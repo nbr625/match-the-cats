@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import Card from './Card'
 import Score from './Score'
+import StatusText from './StatusText';
 import '../assets/styles/index.css'
 
-class Game extends Component {
+export default class Game extends Component {
 
     constructor(props){
         super(props);
@@ -11,7 +12,11 @@ class Game extends Component {
         this.state = {
             cats: this.createCatCards(),
             activePlayer: 1,
-            score: [0, 0]
+            score: [0, 0],
+            selectedCard: {},
+            attemptedMatch: {},
+            activeText: 'Start us off Player 1',
+            gameOver: false
         }
 
     }
@@ -44,14 +49,16 @@ class Game extends Component {
         this.setState({
             cats: this.createCatCards(),
             activePlayer: 1,
-            selectedCard: {}
+            selectedCard: {},
+            gameOver: false
         });
     }
 
     selectCard = (index) => {
-        if(!this.state.cats[index].matched) {
-            let newCats = this.state.cats;
-            if (!this.state.selectedCard) {
+        let s = this.state;
+        if(!s.cats[index].matched) {
+            let newCats = s.cats;
+            if (!Object.keys(s.selectedCard).length) {
                 this.setState({
                     cats: newCats,
                     selectedCard: { id: newCats[index].id, img: newCats[index].img }
@@ -72,66 +79,115 @@ class Game extends Component {
                 if(cat.img === selectedImage){
                     cat.matched = true;
                 }
+                return cat;
             });
-            this.setState({
-                cats: newCats,
-                selectedCard: {}
-            });
-
-            this.scoreUp(s.activePlayer)
+            this.scoreUp(newCats)
         } else {
-            this.changePlayer(s.activePlayer);
+            this.changePlayer(newCats[index]);
         }
 
     }
 
-    scoreUp = (player) => {
-         let newScore = this.state.score ;
-         if(player === 1){
-             newScore[0] = newScore[0] + 1
-         } else {
-             newScore[1] = newScore[1] + 1
-         }
+    scoreUp = (newCards) => {
+         let s = this.state,
+             newScore = s.score;
+         newScore[s.activePlayer - 1] = newScore[s.activePlayer - 1] + 1;
+
          this.setState({
-             score: newScore
-         })
+             cats: newCards,
+             selectedCard: {},
+             matchedCard: {},
+             score: newScore,
+             activeText: 'Its a match! Well done Player ' + s.activePlayer + '!'
+         });
+
          if( newScore.reduce((a, b) => a + b ) === 8){
-            this.concludeGame();
+            this.setState({ gameOver: true });
+         }  else {
+             setTimeout( () => {
+                 this.setState({
+                     activeText: 'Player ' + this.state.activePlayer + ' it is still your turn.'
+                 })
+             }, 1500)
          }
+
+    }
+
+    changePlayer = (card) => {
+        let newPlayer = this.state.activePlayer === 1 ? 2 : 1;
+
+        this.setState({
+            activeText: 'Oh it is not a match...' ,
+            attemptedMatch: {id: card.id, img: card.img}
+        });
+        setTimeout( () => {
+            this.setState({
+                activePlayer: newPlayer,
+                selectedCard: {},
+                attemptedMatch: {},
+                activeText: 'Player ' + newPlayer + ' it is your move!'
+            })
+        }, 1500)
+
 
     }
 
     concludeGame = () => {
-         alert('Player ' + this.state.activePlayer + 'has mangaged to match more cats! Victory is yours!' )
-    }
+         this.setState({ activeText: 'Player ' + this.state.activePlayer + 'has mangaged to match more cats! Victory is yours!' });
+    };
 
-    changePlayer = (player) => {
-        let newPlayer = player === 1 ? 2 : 1;
-        this.setState({
-            activePlayer: newPlayer,
-            selectedCard: {}
-        })
-    }
 
-    render() {
+
+    renderGame = () =>{
         let s = this.state,
             cats = s.cats;
         return (
-            <div>
-                <div className="cardGrid">
-                    {cats.map((c, i) => {
-                        return (
-                            <div className="card" onClick={() => this.selectCard(i)}>
-                                <Card cat={c} key={i} selectedCard={s.selectedCard} />
-                            </div>
-                        );
-                    })}
+            <div className="game">
+                <StatusText activeText={s.activeText}  />
+
+                <div className="controls">
+                    <div className="cardGrid">
+                        {cats.map((c, i) => {
+                            return (
+                                <div className="card" onClick={() => this.selectCard(i)}>
+                                    <Card cat={c} key={i} selectedCard={s.selectedCard} attemptedMatch={s.attemptedMatch} />
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <Score activePlayer={s.activePlayer} score={s.score}/>
                 </div>
 
-                <Score activePlayer={s.activePlayer} score={s.score}/>
+
             </div>
-        );
+        )
+    }
+
+    renderGameOver = () => {
+        let s = this.state;
+        if(s.score[0] === s.score[1]){
+            return (
+                <div className="game">
+                    <p>It is a tie! You are equally matched!</p>
+                    <div onClick={this.restartGame}>Rematch</div>
+                </div>
+            )
+
+        }  else {
+            return (
+                <div className="game">
+                    <p>Player {s.activePlayer} has won!</p>
+                    <div onClick={this.restartGame}>Rematch</div>
+                </div>
+            )
+        }
+    }
+
+    render() {
+         if (!this.state.gameOver){
+             return this.renderGame()
+         } else {
+             return this.renderGameOver()
+         }
     }
 }
-
-export default Game;

@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 
-class Score extends Component {
-
+export default class Score extends Component {
 
     render() {
         let playerOneColor = this.props.activePlayer === 1 ? 'red' : 'gray',
@@ -9,11 +8,15 @@ class Score extends Component {
 
         return (
             <div className="scoreBoard">
-                <div style={{ color: playerOneColor }} className="player">Player 1 <span>{this.props.score[0]}</span></div>
-                <div style={{ color: playerTwoColor }} className="player">Player 2 <span>{this.props.score[1]}</span></div>
+                <div style={{ color: playerOneColor }} className="player">
+                    <div className="playerTag">Player 1</div>
+                    <div className="playerScore">{this.props.score[0]}</div>
+                </div>
+                <div style={{ color: playerTwoColor }} className="player">
+                    <div className="playerTag">Player 2</div>
+                    <div className="playerScore">{this.props.score[1]}</div>
+                </div>
             </div>
         );
     }
 }
-
-export default Score;

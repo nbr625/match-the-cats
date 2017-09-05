@@ -46,7 +46,7 @@
     display: flex;
     justify-content: space-around;
 
-    font-size: 25px;
+    font-size: 1.5em;
     font-family: Courier;
 }
 
@@ -54,6 +54,30 @@
     background-color: grey;
     color: white;
     width: 100%;
-    font-size: 30px;
+    font-size: 1.5em;
     font-family: Courier;
+}
+
+.gameOver {
+    background-color: green;
+    position: absolute;
+    top: 35%;
+    left: 25%;
+    width: 50%;
+    height: 25%;
+    font-size: 2em;
+    font-family: Courier;
+    color: white;
+    border-style: solid;
+    border-color: black;
+    border-width: 10px;
+
+}
+
+.rematchButton {
+    color: white;
+    background-color: black;
+    width: 30%;
+    position: relative;
+    left: 35%;
 }

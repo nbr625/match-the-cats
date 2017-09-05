@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import Card from './Card'
 import Score from './Score'
 import StatusText from './StatusText';
+import ReactAudioPlayer from 'react-audio-player'
+import themeSong from '../assets/audio/theme-song.mp3';
 import '../assets/styles/index.css'
 
 export default class Game extends Component {
@@ -49,8 +51,11 @@ export default class Game extends Component {
         this.setState({
             cats: this.createCatCards(),
             activePlayer: 1,
+            score: [0, 0],
             selectedCard: {},
-            gameOver: false
+            attemptedMatch: {},
+            gameOver: false,
+            activeText: 'Start us off Player 1'
         });
     }
 
@@ -136,9 +141,27 @@ export default class Game extends Component {
          this.setState({ activeText: 'Player ' + this.state.activePlayer + 'has mangaged to match more cats! Victory is yours!' });
     };
 
+    renderGameOver = () => {
+        let s = this.state;
+        if(s.score[0] === s.score[1]){
+            return (
+                <div className="gameOver">
+                    <p>It is a tie! You are equally matched!</p>
+                    <div onClick={this.restartGame} className="rematchButton">Rematch?</div>
+                </div>
+            )
 
+        }  else {
+            return (
+                <div className="gameOver">
+                    <p>Player {s.activePlayer} has won!</p>
+                    <div onClick={this.restartGame} className="rematchButton">Rematch?</div>
+                </div>
+            )
+        }
+    }
 
-    renderGame = () =>{
+    render() {
         let s = this.state,
             cats = s.cats;
         return (
@@ -156,38 +179,17 @@ export default class Game extends Component {
                         })}
                     </div>
                     <Score activePlayer={s.activePlayer} score={s.score}/>
+                    <ReactAudioPlayer
+                        src={themeSong}
+                        autoPlay
+                    />
+
                 </div>
+                {s.gameOver ? this.renderGameOver() : null}
 
 
             </div>
-        )
-    }
+        );
 
-    renderGameOver = () => {
-        let s = this.state;
-        if(s.score[0] === s.score[1]){
-            return (
-                <div className="game">
-                    <p>It is a tie! You are equally matched!</p>
-                    <div onClick={this.restartGame}>Rematch</div>
-                </div>
-            )
-
-        }  else {
-            return (
-                <div className="game">
-                    <p>Player {s.activePlayer} has won!</p>
-                    <div onClick={this.restartGame}>Rematch</div>
-                </div>
-            )
-        }
-    }
-
-    render() {
-         if (!this.state.gameOver){
-             return this.renderGame()
-         } else {
-             return this.renderGameOver()
-         }
     }
 }
